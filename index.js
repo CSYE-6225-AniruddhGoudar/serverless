@@ -16,6 +16,10 @@ const { DataTypes, Sequelize } = require('sequelize');
 
 dotenv.config();
 
+const mailgunApiKey = process.env.MAILGUN_API_KEY;
+const mailgun_domain = process.env.DOMAIN_NAME; 
+const fromemail_Mailgun = process.env.MAILGUN_FROM_EMAIL;
+const verification_link = process.env.VERIFICATION_LINK;
 
 const dbHost = process.env.DATABASE_HOST;
 const dbDatabase = process.env.DATABASE_NAME; 
@@ -26,7 +30,7 @@ const dbPassword = process.env.DATABASE_PASSWORD;
 console.log("dbHost ", dbHost);
 console.log("dbUser ", dbUser);
  console.log("dbPassword ", dbPassword);
-   console.log("dbDatabase ", dbDatabase);
+   console.log("dbDataverification_linkbase ", verification_link);
 
 
 const databaseConnection = new Sequelize(dbDatabase, dbUser, dbPassword, {
@@ -100,18 +104,18 @@ tableName: "accounts",
 
 // Function to send email verification link using Mailgun API
 const sendVerificationEmail = async (email, verificationLink,verificationtoken) => {
-    const mailgunApiKey = '325f9b0aec49fac0609d9abb27ee542c-f68a26c9-e987ec87'; // Replace with your Mailgun API key
-    const mailgunDomain = 'goudar.me'; // Replace with your Mailgun domain
+    // const mailgunApiKey = '325f9b0aec49fac0609d9abb27ee542c-f68a26c9-e987ec87'; // Replace with your Mailgun API key
+    // const mailgunDomain = 'goudar.me'; // Replace with your Mailgun domain
 
     const auth = mailgun({
         apiKey: mailgunApiKey,
-        domain: mailgunDomain
+        domain: mailgun_domain
     });
     
    // const verificationLink = `http://goudar.me:8080/v1/user/emailverification/${verificationtoken}`;
 
     const mailData = {
-        from: 'Aniruddh Goudar <postmaster@goudar.me>',
+        from: fromemail_Mailgun,
         to: email,
         subject: 'Verification of Your Email Address',
         text: `Click the following link to verify your email address: ${verificationLink}`,
@@ -163,8 +167,7 @@ module.exports.userUpdate = async (email, verificationtoken) => {
         console.log('Parsed Data:', data);
 
         const { verificationtoken, email } = data;
-
-        const verificationLink = `http://goudar.me:8080/v1/user/emailverification/${verificationtoken}`;
+        const verificationLink = `${verification_link}/${verificationtoken}`;
 
         await sendVerificationEmail(email, verificationLink, verificationtoken);
 
